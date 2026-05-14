@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎮 Admin — GarticPhone</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0d1a;
+  --surface: #13132a;
+  --surface2: #1a1a3a;
+  --pink: #ff2d78;
+  --yellow: #ffd93d;
+  --cyan: #00f5d4;
+  --purple: #c77dff;
+  --green: #06d6a0;
+  --red: #ff4757;
+  --text: #f0f0ff;
+  --muted: #7a7aaa;
+  --r: 16px;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 60px;
+  gap: 20px;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; margin-bottom: 4px;
+}
+.logo {
+  font-family: 'Boogaloo', cursive;
+  font-size: 2.8rem;
+  background: linear-gradient(135deg, var(--pink), var(--yellow), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 24px rgba(255,45,120,0.5));
+  letter-spacing: 2px;
+}
+.header-sub {
+  font-size: 0.82rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+}
+
+/* ── STATUS BAR ── */
+#status-bar {
+  width: 100%; max-width: 720px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center;
+  position: relative; overflow: hidden;
+}
+#status-bar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--cyan), var(--yellow), var(--purple));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer { from{background-position:0% 0%} to{background-position:200% 0%} }
+
+.stat {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.9rem;
+}
+.stat-label { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; }
+.stat-value {
+  font-family: 'Boogaloo', cursive; font-size: 1.1rem;
+  color: var(--cyan);
+}
+.phase-badge {
+  background: rgba(0,245,212,0.12); color: var(--cyan);
+  padding: 4px 14px; border-radius: 99px;
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  border: 1px solid rgba(0,245,212,0.3);
+}
+.phase-badge.playing { background: rgba(255,45,120,0.12); color: var(--pink); border-color: rgba(255,45,120,0.3); }
+.phase-badge.results { background: rgba(255,217,61,0.12); color: var(--yellow); border-color: rgba(255,217,61,0.3); }
+
+#refresh-btn {
+  margin-left: auto; background: none; border: 1.5px solid rgba(255,255,255,0.12);
+  color: var(--muted); border-radius: 10px; padding: 6px 14px;
+  cursor: pointer; font-family: 'Quicksand', sans-serif; font-size: 0.82rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+#refresh-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── GRID ── */
+.grid {
+  width: 100%; max-width: 720px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+@media (max-width: 540px) { .grid { grid-template-columns: 1fr; } }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 22px 20px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.card.wide { grid-column: 1 / -1; }
+.card h3 {
+  font-family: 'Boogaloo', cursive;
+  font-size: 1.25rem; color: var(--cyan); letter-spacing: 0.5px;
+}
+
+/* ── INPUTS ── */
+input[type="text"], input[type="number"] {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95rem; font-weight: 700; outline: none; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,245,212,0.1); }
+input::placeholder { color: var(--muted); font-weight: 400; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 18px; border-radius: 12px;
+  font-family: 'Boogaloo', cursive;
+  font-size: 1rem; cursor: pointer; border: none;
+  transition: transform 0.12s, box-shadow 0.2s, opacity 0.15s;
+  letter-spacing: 0.5px; width: 100%;
+}
+.btn:active { transform: scale(0.95) !important; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-green  { background: linear-gradient(135deg, var(--green), var(--cyan)); color: #0d0d1a; box-shadow: 0 4px 18px rgba(6,214,160,0.35); }
+.btn-pink   { background: linear-gradient(135deg, var(--pink), #ff6b6b); color: white; box-shadow: 0 4px 18px rgba(255,45,120,0.35); }
+.btn-yellow { background: linear-gradient(135deg, var(--yellow), #ffb347); color: #0d0d1a; box-shadow: 0 4px 18px rgba(255,217,61,0.35); }
+.btn-purple { background: linear-gradient(135deg, var(--purple), #7b2ff7); color: white; box-shadow: 0 4px 18px rgba(199,125,255,0.3); }
+.btn-red    { background: linear-gradient(135deg, var(--red), #c0392b); color: white; box-shadow: 0 4px 18px rgba(255,71,87,0.35); }
+.btn-ghost  { background: rgba(255,255,255,0.05); color: var(--muted); border: 1.5px solid rgba(255,255,255,0.1); }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+.btn:hover { transform: translateY(-2px); }
+
+.btn-row { display: flex; gap: 10px; }
+.btn-row .btn { flex: 1; }
+
+/* ── PLAYERS LIST ── */
+#players-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.player-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 99px; padding: 7px 14px;
+  font-size: 0.88rem; font-weight: 700;
+  animation: chipIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes chipIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+.player-chip.ready { border-color: var(--green); box-shadow: 0 0 10px rgba(6,214,160,0.25); }
+.player-chip .avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 800;
+}
+.kick-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 0.9rem; padding: 0 2px;
+  transition: color 0.2s;
+}
+.kick-btn:hover { color: var(--red); }
+
+/* ── TROLL GRID ── */
+.troll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (max-width: 400px) { .troll-grid { grid-template-columns: 1fr 1fr; } }
+.troll-btn {
+  padding: 10px 6px; font-size: 0.88rem; border-radius: 11px;
+  font-family: 'Boogaloo', cursive;
+  cursor: pointer; border: none; letter-spacing: 0.3px;
+  transition: transform 0.12s, opacity 0.15s;
+  background: rgba(255,255,255,0.06); color: var(--text);
+  border: 1.5px solid rgba(255,255,255,0.1);
+}
+.troll-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.04); }
+.troll-btn:active { transform: scale(0.93); }
+
+/* ── TARGET ROW ── */
+.target-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; color: var(--muted);
+}
+.target-row select {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.9rem; outline: none;
+  transition: border-color 0.2s;
+}
+.target-row select:focus { border-color: var(--cyan); }
+.target-row select option { background: #1a1a3a; }
+
+/* ── LOG ── */
+#log-box {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 12px;
+  max-height: 140px; overflow-y: auto;
+  font-size: 0.8rem; color: var(--muted);
+  font-family: 'Courier New', monospace;
+  display: flex; flex-direction: column; gap: 3px;
+}
+#log-box::-webkit-scrollbar { width: 4px; }
+#log-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.log-entry { color: var(--text); opacity: 0.75; }
+.log-entry.ok  { color: var(--green); opacity: 1; }
+.log-entry.err { color: var(--red);   opacity: 1; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--surface2); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 12px 24px;
+  font-weight: 700; font-size: 0.9rem; color: var(--text);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  z-index: 999; pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── MEDIA LIST ── */
+.media-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.media-tag {
+  background: rgba(199,125,255,0.12); color: var(--purple);
+  border: 1px solid rgba(199,125,255,0.25);
+  border-radius: 8px; padding: 4px 10px;
+  font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.media-tag:hover { background: rgba(199,125,255,0.25); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🎮 Admin Panel</div>
+  <div class="header-sub">GarticPhone Ultimate</div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="status-bar">
+  <div class="stat">
+    <span class="stat-label">Phase</span>
+    <span id="s-phase" class="phase-badge">—</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Round</span>
+    <span id="s-round" class="stat-value">—</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Timer</span>
+    <span id="s-timer" class="stat-value">—s</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Joueurs</span>
+    <span id="s-players" class="stat-value">0</span>
+  </div>
+  <button id="refresh-btn" onclick="loadState()">⟳ Refresh</button>
+</div>
+
+<!-- GRID -->
+<div class="grid">
+
+  <!-- GAME CONTROL -->
+  <div class="card">
+    <h3>🕹️ Partie</h3>
+    <button class="btn btn-green" onclick="api('start')">▶ Démarrer</button>
+    <div class="btn-row">
+      <button class="btn btn-yellow" onclick="api('skip')">⏭ Skip round</button>
+      <button class="btn btn-purple" onclick="api('results')">🏆 Résultats</button>
+    </div>
+    <button class="btn btn-red" onclick="api('reset')">🔄 Reset lobby</button>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+    <h3>⚙️ Réglages</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="number" id="inp-rounds" placeholder="Rounds" min="1" max="20" style="flex:1">
+      <button class="btn btn-ghost" style="width:auto;padding:10px 14px" onclick="setRounds()">✓</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="number" id="inp-timer" placeholder="Timer (s)" min="10" max="300" style="flex:1">
+      <button class="btn btn-ghost" style="width:auto;padding:10px 14px" onclick="setTimer()">✓</button>
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted)">Rounds actuels : <span id="cur-rounds" style="color:var(--cyan)">—</span> &nbsp;|&nbsp; Timer : <span id="cur-timer" style="color:var(--cyan)">—</span>s</div>
+  </div>
+
+  <!-- PLAYERS -->
+  <div class="card wide">
+    <h3>👥 Joueurs connectés</h3>
+    <div id="players-list"><span style="color:var(--muted);font-size:0.85rem">Chargement…</span></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="card">
+    <h3>💬 Message à tous</h3>
+    <input type="text" id="inp-chat" placeholder="Tape ton message…">
+    <button class="btn btn-purple" onclick="sendChat()">📢 Envoyer</button>
+  </div>
+
+  <!-- KICK -->
+  <div class="card">
+    <h3>👢 Kick</h3>
+    <div class="target-row">
+      <span>Joueur :</span>
+      <select id="sel-kick">
+        <option value="">— choisir —</option>
+      </select>
+    </div>
+    <button class="btn btn-red" onclick="kick()">Kick 💀</button>
+  </div>
+
+  <!-- TROLL EFFECTS -->
+  <div class="card wide">
+    <h3>😈 Effets Troll</h3>
+    <div class="target-row" style="margin-bottom:4px">
+      <span>Cible :</span>
+      <select id="sel-troll">
+        <option value="all">Tout le monde</option>
+      </select>
+    </div>
+    <div class="troll-grid">
+      <button class="troll-btn" onclick="troll('trollshake')">📳 Shake</button>
+      <button class="troll-btn" onclick="troll('trollblind')">🌑 Blind</button>
+      <button class="troll-btn" onclick="troll('trollzoom')">🔍 Zoom</button>
+      <button class="troll-btn" onclick="troll('trollflip')">🙃 Flip</button>
+      <button class="troll-btn" onclick="troll('trollclear')" style="border-color:rgba(0,245,212,0.3);color:var(--cyan)">✗ Clear</button>
+    </div>
+  </div>
+
+  <!-- TROLL TEXT -->
+  <div class="card">
+    <h3>📢 Troll Texte</h3>
+    <div class="target-row">
+      <span>Cible :</span>
+      <select id="sel-ttext">
+        <option value="all">Tout le monde</option>
+      </select>
+    </div>
+    <input type="text" id="inp-ttext" placeholder="T'as perdu !">
+    <button class="btn btn-pink" onclick="trollText()">💬 Envoyer</button>
+  </div>
+
+  <!-- TROLL MEDIA -->
+  <div class="card">
+    <h3>🎬 Troll Média (fichiers)</h3>
+    <div class="target-row">
+      <span>Cible :</span>
+      <select id="sel-tmedia">
+        <option value="all">Tout le monde</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select id="sel-mtype" style="flex:1;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Quicksand',sans-serif;outline:none;">
+        <option value="image">🖼 Image</option>
+        <option value="video">🎥 Vidéo</option>
+        <option value="sound">🔊 Son</option>
+      </select>
+    </div>
+    <input type="text" id="inp-mfile" placeholder="nom ou index (ex: 0, rick.mp4)">
+    <button class="btn btn-yellow" onclick="trollMedia()">🚀 Envoyer</button>
+  </div>
+
+  <!-- TROLL URL -->
+  <div class="card">
+    <h3>🌐 Troll URL</h3>
+    <div class="target-row">
+      <span>Cible :</span>
+      <select id="sel-turl">
+        <option value="all">Tout le monde</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:2px">
+      <select id="sel-urltype" style="flex:1;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Quicksand',sans-serif;outline:none;">
+        <option value="youtube">▶️ YouTube</option>
+        <option value="image">🖼 Image URL</option>
+        <option value="video">🎥 Vidéo URL</option>
+        <option value="sound">🔊 Son URL</option>
+      </select>
+    </div>
+    <input type="text" id="inp-url" placeholder="https://youtu.be/... ou lien direct">
+    <button class="btn btn-pink" onclick="trollUrl()">🚀 Envoyer URL</button>
+  </div>
+
+  <!-- MEDIA FILES -->
+  <div class="card wide">
+    <h3>📁 Fichiers disponibles</h3>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Images</div>
+        <div id="media-images" class="media-list"><span style="color:var(--muted);font-size:0.8rem">—</span></div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Vidéos</div>
+        <div id="media-videos" class="media-list"><span style="color:var(--muted);font-size:0.8rem">—</span></div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Sons</div>
+        <div id="media-sounds" class="media-list"><span style="color:var(--muted);font-size:0.8rem">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="card wide">
+    <h3>📋 Log des actions</h3>
+    <div id="log-box"></div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = '';  // même origine
+
+const COLORS = ['#ff2d78','#ffd93d','#00f5d4','#06d6a0','#c77dff','#3a86ff','#ff9f1c','#1abc9c'];
+let players = [];
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+async function api(endpoint, body = null) {
+  const method = body !== null ? 'POST' : 'POST';
+  try {
+    const res = await fetch(`${BASE}/api/admin/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
+    const data = await res.json();
+    if (data.error) { logEntry(data.error, 'err'); toast('❌ ' + data.error); }
+    else { logEntry(`✅ /${endpoint} OK`); toast('✅ ' + endpoint); loadState(); }
+    return data;
+  } catch(e) {
+    logEntry('Erreur réseau: ' + e.message, 'err');
+    toast('❌ Erreur réseau');
+  }
+}
+
+function logEntry(msg, type = '') {
+  const box = document.getElementById('log-box');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  const time = new Date().toLocaleTimeString('fr', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  el.textContent = `[${time}] ${msg}`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function updateSelects() {
+  const selects = ['sel-kick', 'sel-troll', 'sel-ttext', 'sel-tmedia', 'sel-turl'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    // keep 'all' option for troll selects
+    if (id === 'sel-kick') {
+      sel.innerHTML = '<option value="">— choisir —</option>';
+    } else {
+      sel.innerHTML = '<option value="all">Tout le monde</option>';
+    }
+    players.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name; opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+  });
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+async function loadState() {
+  try {
+    const res = await fetch(`${BASE}/api/admin/state`);
+    const d = await res.json();
+
+    const phase = document.getElementById('s-phase');
+    phase.textContent = d.phase;
+    phase.className = 'phase-badge ' + (d.phase === 'playing' ? 'playing' : d.phase === 'results' ? 'results' : '');
+
+    document.getElementById('s-round').textContent = d.phase === 'playing' ? `${d.round} / ${d.totalRounds * d.players.length}` : '—';
+    document.getElementById('s-timer').textContent = d.timerDuration;
+    document.getElementById('s-players').textContent = d.players.length;
+    document.getElementById('cur-rounds').textContent = d.totalRounds;
+    document.getElementById('cur-timer').textContent = d.timerDuration;
+
+    players = d.players;
+    renderPlayers(d.players);
+    updateSelects();
+  } catch(e) {
+    logEntry('Impossible de charger l\'état: ' + e.message, 'err');
+  }
+}
+
+function renderPlayers(list) {
+  const el = document.getElementById('players-list');
+  if (!list.length) { el.innerHTML = '<span style="color:var(--muted);font-size:0.85rem">Aucun joueur</span>'; return; }
+  el.innerHTML = list.map((p, i) => {
+    const col = COLORS[i % COLORS.length];
+    return `<div class="player-chip ${p.ready ? 'ready' : ''}">
+      <div class="avatar" style="background:${col}22;color:${col}">${p.name.slice(0,2).toUpperCase()}</div>
+      <span>${p.name}</span>
+      ${p.ready ? '<span style="color:var(--green)">✓</span>' : ''}
+      <button class="kick-btn" onclick="kickDirect('${p.name.replace(/'/g,"\\'")}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────────────
+function setRounds() {
+  const v = parseInt(document.getElementById('inp-rounds').value);
+  if (!v) return toast('Entre un nombre de rounds');
+  api('rounds', { value: v });
+}
+function setTimer() {
+  const v = parseInt(document.getElementById('inp-timer').value);
+  if (!v) return toast('Entre une durée');
+  api('timer', { value: v });
+}
+function sendChat() {
+  const t = document.getElementById('inp-chat').value.trim();
+  if (!t) return toast('Message vide');
+  api('chat', { text: t });
+  document.getElementById('inp-chat').value = '';
+}
+function kick() {
+  const t = document.getElementById('sel-kick').value;
+  if (!t) return toast('Choisis un joueur');
+  api('kick', { target: t });
+}
+function kickDirect(name) {
+  api('kick', { target: name });
+}
+function troll(effect) {
+  const target = document.getElementById('sel-troll').value || 'all';
+  api(effect, { target });
+}
+function trollText() {
+  const target = document.getElementById('sel-ttext').value || 'all';
+  const text = document.getElementById('inp-ttext').value.trim();
+  if (!text) return toast('Texte vide');
+  api('trolltext', { target, text });
+}
+function trollUrl() {
+  const target = document.getElementById('sel-turl').value || 'all';
+  const mediaType = document.getElementById('sel-urltype').value;
+  const url = document.getElementById('inp-url').value.trim();
+  if (!url) return toast('URL vide');
+  api('trollurl', { target, mediaType, url });
+  document.getElementById('inp-url').value = '';
+}
+
+  const target = document.getElementById('sel-tmedia').value || 'all';
+  const type = document.getElementById('sel-mtype').value;
+  const file = document.getElementById('inp-mfile').value.trim();
+  if (!file) return toast('Nom ou index requis');
+  api('trollsend', { target, type, file });
+}
+
+// ── MEDIA LIST ─────────────────────────────────────────────────────────────
+async function loadMedia() {
+  try {
+    const res = await fetch(`${BASE}/api/trollmedia`);
+    const d = await res.json();
+    renderMedia('media-images', d.images);
+    renderMedia('media-videos', d.videos);
+    renderMedia('media-sounds', d.sounds);
+  } catch(e) {
+    logEntry('Impossible de charger les médias', 'err');
+  }
+}
+
+function renderMedia(elId, files) {
+  const el = document.getElementById(elId);
+  if (!files.length) { el.innerHTML = '<span style="color:var(--muted);font-size:0.8rem">Aucun</span>'; return; }
+  el.innerHTML = files.map((f, i) => `<span class="media-tag" title="index: ${i}" onclick="document.getElementById('inp-mfile').value='${f}'">[${i}] ${f}</span>`).join('');
+}
+
+// ── KEYBOARD SHORTCUTS ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'r') loadState();
+});
+
+// ── ENTER on inputs ────────────────────────────────────────────────────────
+document.getElementById('inp-chat').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+document.getElementById('inp-ttext').addEventListener('keydown', e => { if (e.key === 'Enter') trollText(); });
+document.getElementById('inp-mfile').addEventListener('keydown', e => { if (e.key === 'Enter') trollMedia(); });
+document.getElementById('inp-url').addEventListener('keydown', e => { if (e.key === 'Enter') trollUrl(); });
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+loadState();
+loadMedia();
+setInterval(loadState, 5000);  // auto-refresh toutes les 5s
+logEntry('Panel admin chargé 🎮');
+</script>
+</body>
+</html>
