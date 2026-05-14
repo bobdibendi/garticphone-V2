@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>🎨 GarticPhone ULTRA</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0d1a;
+  --surface: #13132a;
+  --surface2: #1a1a3a;
+  --pink: #ff2d78;
+  --yellow: #ffd93d;
+  --cyan: #00f5d4;
+  --purple: #c77dff;
+  --green: #06d6a0;
+  --text: #f0f0ff;
+  --muted: #7a7aaa;
+  --r: 18px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── CANVAS BACKGROUND ─────────────────────────────────────────── */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
+#app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 16px 60px;
+}
+
+/* ── LOGO ──────────────────────────────────────────────────────── */
+.logo-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 8px;
+}
+.logo {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(2.6rem, 9vw, 4.5rem);
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--pink), var(--yellow), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: logoPulse 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(255,45,120,0.4));
+}
+@keyframes logoPulse {
+  0%,100% { filter: drop-shadow(0 0 20px rgba(255,45,120,0.4)); }
+  50% { filter: drop-shadow(0 0 50px rgba(0,245,212,0.6)); }
+}
+.logo-stars {
+  font-size: 1.4rem; letter-spacing: 4px; margin-top: -4px;
+  animation: spin 10s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.subtitle {
+  color: var(--muted); font-size: 0.88rem; margin-bottom: 28px; letter-spacing: 1px;
+}
+
+/* ── MUSIC BUTTON ──────────────────────────────────────────────── */
+#music-btn {
+  position: fixed; top: 14px; right: 14px; z-index: 200;
+  background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 50%; width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.3rem;
+  transition: background 0.2s, transform 0.2s;
+  backdrop-filter: blur(10px);
+}
+#music-btn:hover { background: rgba(255,45,120,0.25); transform: scale(1.1); }
+#music-btn.playing { animation: musicPulse 1.5s ease-in-out infinite; }
+@keyframes musicPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,45,120,0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(255,45,120,0); }
+}
+
+/* ── CARDS ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 28px 24px;
+  width: 100%; max-width: 520px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--cyan), var(--yellow), var(--purple));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer { from{background-position:0% 0%} to{background-position:200% 0%} }
+
+.card h2 {
+  font-family: 'Boogaloo', cursive;
+  font-size: 1.5rem; margin-bottom: 18px; color: var(--cyan);
+}
+
+/* ── INPUTS ─────────────────────────────────────────────────────── */
+input[type="text"] {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 14px 16px;
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1rem; font-weight: 700; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(0,245,212,0.1);
+}
+input[type="text"]::placeholder { color: var(--muted); font-weight: 400; }
+
+/* ── BUTTONS ────────────────────────────────────────────────────── */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 15px 28px; border-radius: 14px;
+  font-family: 'Boogaloo', cursive;
+  font-size: 1.15rem; cursor: pointer; border: none;
+  transition: transform 0.12s, box-shadow 0.2s, opacity 0.15s;
+  width: 100%; margin-top: 14px;
+  position: relative; overflow: hidden;
+  letter-spacing: 0.5px;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,0); transition: background 0.15s;
+}
+.btn:hover::after { background: rgba(255,255,255,0.08); }
+.btn:active { transform: scale(0.95) !important; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--pink), #ff6b6b);
+  color: white;
+  box-shadow: 0 4px 20px rgba(255,45,120,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,45,120,0.5); }
+
+.btn-success {
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  color: #0d0d1a;
+  box-shadow: 0 4px 20px rgba(6,214,160,0.4);
+}
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(6,214,160,0.5); }
+
+.btn-purple {
+  background: linear-gradient(135deg, var(--purple), #7b2ff7);
+  color: white;
+  box-shadow: 0 4px 20px rgba(199,125,255,0.35);
+}
+.btn-purple:hover { transform: translateY(-2px); }
+
+/* ── PLAYERS GRID ───────────────────────────────────────────────── */
+.players-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.player-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 99px; padding: 8px 16px;
+  font-size: 0.9rem; font-weight: 700;
+  border: 1.5px solid rgba(255,255,255,0.07);
+  transition: border-color 0.3s, transform 0.2s;
+  animation: chipIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes chipIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+.player-chip.ready { border-color: var(--green); box-shadow: 0 0 12px rgba(6,214,160,0.3); }
+.player-chip .avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
+}
+
+/* ── TIMER ──────────────────────────────────────────────────────── */
+#timer-wrap {
+  width: 100%; max-width: 520px; margin-bottom: 14px; display: none;
+}
+#timer-text {
+  text-align: center; font-family: 'Boogaloo', cursive;
+  font-size: 1.3rem; color: var(--cyan); margin-bottom: 8px;
+}
+#timer-num {
+  font-size: 2rem; display: inline-block;
+  transition: transform 0.15s;
+}
+#timer-num.tick { animation: timerTick 0.15s ease-out; }
+@keyframes timerTick { 0%{transform:scale(1.35)} 100%{transform:scale(1)} }
+#timer-bar-bg {
+  height: 10px; background: rgba(255,255,255,0.07);
+  border-radius: 5px; overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+#timer-bar {
+  height: 100%; background: var(--cyan);
+  width: 100%; transition: width 0.9s linear, background 1s;
+  border-radius: 5px;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* ── ROUND BADGE ────────────────────────────────────────────────── */
+.round-badge {
+  display: inline-block;
+  background: rgba(199,125,255,0.15); color: var(--purple);
+  font-size: 0.82rem; font-weight: 700;
+  padding: 5px 14px; border-radius: 99px; margin-bottom: 12px;
+  border: 1px solid rgba(199,125,255,0.3);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── PROMPT DISPLAY ─────────────────────────────────────────────── */
+.prompt-display {
+  background: linear-gradient(135deg, rgba(255,217,61,0.12), rgba(255,45,120,0.08));
+  border: 1.5px solid rgba(255,217,61,0.25);
+  border-radius: 14px; padding: 14px 18px;
+  font-family: 'Boogaloo', cursive;
+  font-size: 1.3rem; color: var(--yellow); text-align: center;
+  margin-bottom: 14px; word-break: break-word;
+  animation: promptAppear 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes promptAppear { from{transform:scale(0.85) translateY(-10px);opacity:0} to{transform:scale(1);opacity:1} }
+
+/* ── CANVAS ─────────────────────────────────────────────────────── */
+#draw-canvas {
+  width: 100%; display: block;
+  border-radius: 14px; cursor: crosshair;
+  touch-action: none; background: white;
+  border: 3px solid rgba(0,245,212,0.3);
+  box-shadow: 0 0 0 0 rgba(0,245,212,0.3);
+  transition: box-shadow 0.3s;
+}
+#draw-canvas:hover { box-shadow: 0 0 0 6px rgba(0,245,212,0.15); }
+
+/* ── TOOLS ──────────────────────────────────────────────────────── */
+.tools {
+  display: flex; gap: 8px; margin-top: 12px;
+  flex-wrap: wrap; align-items: center;
+  background: rgba(255,255,255,0.04);
+  border-radius: 14px; padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.color-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid transparent; cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0; position: relative;
+}
+.color-btn:hover { transform: scale(1.15); }
+.color-btn.active {
+  border-color: white; transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+}
+
+.size-btn {
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px; color: var(--text);
+  font-size: 0.85rem; padding: 7px 12px; cursor: pointer;
+  font-family: 'Boogaloo', cursive; font-size: 1rem;
+  transition: background 0.15s, transform 0.1s;
+}
+.size-btn.active, .size-btn:hover {
+  background: var(--purple); border-color: var(--purple);
+  transform: scale(1.05);
+}
+
+#eraser-btn {
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px; color: var(--text);
+  font-size: 1.1rem; padding: 6px 11px; cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+#eraser-btn.active { background: var(--pink); border-color: var(--pink); }
+
+#clear-btn {
+  background: rgba(255,45,120,0.15); border: 1.5px solid rgba(255,45,120,0.25);
+  border-radius: 10px; color: var(--pink);
+  font-size: 0.85rem; padding: 7px 12px; cursor: pointer;
+  font-family: 'Quicksand', sans-serif; font-weight: 700;
+  transition: background 0.15s, transform 0.1s;
+}
+#clear-btn:hover { background: rgba(255,45,120,0.3); transform: scale(1.05); }
+
+/* brush preview */
+#brush-preview-wrap {
+  display: flex; align-items: center; margin-left: auto;
+}
+#brush-preview {
+  border-radius: 50%; background: #111;
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+/* ── UNDO BTN ───────────────────────────────────────────────────── */
+#undo-btn {
+  background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px; color: var(--text);
+  font-size: 1rem; padding: 6px 11px; cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+#undo-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.05); }
+
+/* ── REF DRAWING ────────────────────────────────────────────────── */
+#ref-drawing-wrap {
+  margin-bottom: 14px; border-radius: 12px; overflow: hidden;
+  border: 2px solid rgba(0,245,212,0.3); display: none;
+  animation: promptAppear 0.4s ease;
+}
+#ref-drawing-wrap img { width: 100%; display: block; }
+#ref-label {
+  background: rgba(0,245,212,0.08); padding: 6px 14px;
+  font-size: 0.82rem; color: var(--cyan); font-weight: 700; text-align: center;
+}
+
+/* ── STATUS CARD ─────────────────────────────────────────────────── */
+.status-card {
+  background: var(--surface); border-radius: var(--r);
+  padding: 40px 24px; text-align: center;
+  width: 100%; max-width: 520px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  position: relative; overflow: hidden;
+}
+.status-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--cyan), var(--yellow), var(--purple));
+  background-size: 200% 100%; animation: shimmer 3s linear infinite;
+}
+
+.status-icon { font-size: 3.5rem; margin-bottom: 14px; display: block; animation: iconFloat 2s ease-in-out infinite; }
+@keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.status-title { font-family: 'Boogaloo', cursive; font-size: 1.8rem; margin-bottom: 10px; color: var(--cyan); }
+
+.waiting-dots span {
+  display: inline-block; animation: bounce 1.2s infinite;
+  font-size: 1.4rem; color: var(--yellow);
+}
+.waiting-dots span:nth-child(2) { animation-delay: 0.2s; }
+.waiting-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+
+/* ── RESULTS ─────────────────────────────────────────────────────── */
+.chain-card {
+  background: var(--surface); border-radius: var(--r);
+  padding: 22px; margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.07);
+  animation: cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.chain-card:nth-child(1) { animation-delay: 0.05s; }
+.chain-card:nth-child(2) { animation-delay: 0.1s; }
+.chain-card:nth-child(3) { animation-delay: 0.15s; }
+@keyframes cardSlideIn { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.chain-title { font-family: 'Boogaloo', cursive; font-size: 1.25rem; color: var(--yellow); margin-bottom: 16px; }
+.chain-step { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.chain-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.step-author { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.step-word {
+  background: linear-gradient(135deg, rgba(255,217,61,0.12), rgba(255,107,107,0.08));
+  border-radius: 10px; padding: 12px 16px; font-weight: 800; font-size: 1.1rem; color: var(--yellow);
+  border: 1px solid rgba(255,217,61,0.2);
+}
+.step-drawing img { width: 100%; border-radius: 10px; border: 2px solid rgba(255,255,255,0.1); }
+
+/* ── TROLL OVERLAY ───────────────────────────────────────────────── */
+#troll-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  align-items: center; justify-content: center; flex-direction: column;
+  background: rgba(0,0,0,0.0); pointer-events: none;
+}
+#troll-overlay.active { display: flex; }
+#troll-overlay.has-media { background: rgba(0,0,0,0.94); pointer-events: all; }
+#troll-media-wrap {
+  max-width: min(90vw, 640px); width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+#troll-media-wrap img, #troll-media-wrap video {
+  max-width: 100%; max-height: 70vh; border-radius: 18px;
+  box-shadow: 0 0 80px rgba(255,45,120,0.7);
+  animation: trollPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+#troll-text-banner {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(2.2rem, 10vw, 5.5rem);
+  color: var(--pink); text-align: center;
+  text-shadow: 0 0 60px rgba(255,45,120,0.9);
+  animation: trollPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  padding: 20px; display: none;
+}
+#troll-close-btn {
+  margin-top: 14px; background: var(--pink); color: white;
+  border: none; border-radius: 14px; padding: 13px 36px;
+  font-family: 'Boogaloo', cursive; font-size: 1.1rem;
+  cursor: pointer; display: none;
+  animation: trollPop 0.5s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes trollPop {
+  from { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes trollShake {
+  0%,100%{ transform: translate(0,0) rotate(0deg); }
+  10%{ transform: translate(-14px,-5px) rotate(-2.5deg); }
+  20%{ transform: translate(14px,5px) rotate(2.5deg); }
+  30%{ transform: translate(-11px,3px) rotate(-1.5deg); }
+  40%{ transform: translate(11px,-3px) rotate(1.5deg); }
+  50%{ transform: translate(-9px,5px) rotate(-2deg); }
+  60%{ transform: translate(9px,-5px) rotate(2deg); }
+  70%{ transform: translate(-7px,2px) rotate(-1deg); }
+  80%{ transform: translate(7px,-2px) rotate(1deg); }
+  90%{ transform: translate(-4px,0) rotate(0); }
+}
+@keyframes trollZoom {
+  0%{ transform:scale(1); } 25%{ transform:scale(1.5); }
+  50%{ transform:scale(0.65); } 75%{ transform:scale(1.25); } 100%{ transform:scale(1); }
+}
+.troll-shaking { animation: trollShake 0.65s ease-in-out 3; }
+.troll-zooming { animation: trollZoom 0.9s ease-in-out 2; }
+#troll-blind {
+  display: none; position: fixed; inset: 0;
+  background: black; z-index: 10000; pointer-events: all;
+}
+
+/* ── CHAT LOG ────────────────────────────────────────────────────── */
+#chat-log {
+  position: fixed; bottom: 16px; right: 16px;
+  width: min(300px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none; z-index: 100;
+}
+.chat-msg {
+  background: rgba(13,13,26,0.96);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 9px 14px; font-size: 0.84rem;
+  animation: slideIn 0.3s ease; backdrop-filter: blur(10px);
+}
+.chat-msg .from { font-weight: 800; color: var(--cyan); }
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+/* ── SECTION SYSTEM ─────────────────────────────────────────────── */
+.section { display: none; width: 100%; }
+
+/* ── PARTICLE BURST ─────────────────────────────────────────────── */
+.particle {
+  position: fixed; pointer-events: none; z-index: 500;
+  border-radius: 50%; animation: particleFly 0.8s ease-out forwards;
+}
+@keyframes particleFly {
+  from { opacity: 1; transform: translate(0,0) scale(1); }
+  to   { opacity: 0; transform: var(--end-pos) scale(0); }
+}
+
+/* ── SCREEN TRANSITION ──────────────────────────────────────────── */
+.section.fade-in { animation: sectionFadeIn 0.35s ease; }
+@keyframes sectionFadeIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── TOAST NOTIFICATION ─────────────────────────────────────────── */
+.toast-notif {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(13,13,26,0.97); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 12px 24px; font-weight: 700;
+  z-index: 5000; animation: toastAnim 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter: blur(20px); white-space: nowrap;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+@keyframes toastAnim { from{opacity:0;transform:translateX(-50%) translateY(-20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+/* ── GLOW VARIANTS ──────────────────────────────────────────────── */
+.glow-cyan { box-shadow: 0 0 20px rgba(0,245,212,0.3); }
+.glow-pink  { box-shadow: 0 0 20px rgba(255,45,120,0.3); }
+</style>
+</head>
+<body>
+
+<!-- Background particles canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Music button -->
+<button id="music-btn" onclick="toggleMusic()" title="Musique">🎵</button>
+
+<!-- Troll overlays -->
+<div id="troll-blind"></div>
+<div id="troll-overlay">
+  <div id="troll-media-wrap">
+    <div id="troll-text-banner"></div>
+  </div>
+  <button id="troll-close-btn" onclick="clearTroll()">Fermer ✖</button>
+</div>
+
+<!-- Chat log -->
+<div id="chat-log"></div>
+
+<div id="app">
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo">🎨 GarticPhone</div>
+    <div class="logo-stars">✦ ✧ ✦</div>
+  </div>
+  <div class="subtitle">Dessine · Devine · Ris · Trolls 😈</div>
+
+  <!-- ── JOIN ─────────────────────────────────────────────────── -->
+  <div id="s-join" class="section" style="display:block; max-width:520px;">
+    <div class="card">
+      <h2>🚀 Rejoindre la partie</h2>
+      <input type="text" id="name-input" placeholder="Ton prénom..." maxlength="20" autocomplete="off" />
+      <button class="btn btn-primary" onclick="joinGame()">C'est parti ! 🎮</button>
+    </div>
+  </div>
+
+  <!-- ── LOBBY ─────────────────────────────────────────────────── -->
+  <div id="s-lobby" class="section" style="max-width:520px;">
+    <div class="card">
+      <h2>🏠 Salle d'attente</h2>
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:4px;">Joueurs connectés :</p>
+      <div id="players-list" class="players-grid"></div>
+      <button class="btn btn-success" id="ready-btn" onclick="setReady()" style="margin-top:22px;">✅ Je suis prêt !</button>
+      <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-top:10px;">La partie démarre quand tout le monde est prêt</p>
+    </div>
+  </div>
+
+  <!-- ── TIMER ─────────────────────────────────────────────────── -->
+  <div id="timer-wrap">
+    <div id="timer-text">⏱ <span id="timer-num">80</span>s</div>
+    <div id="timer-bar-bg"><div id="timer-bar"></div></div>
+  </div>
+
+  <!-- ── WORD ──────────────────────────────────────────────────── -->
+  <div id="s-word" class="section" style="max-width:520px;">
+    <div class="card">
+      <div id="word-badge" class="round-badge">Round 1</div>
+      <h2 id="word-title">✏️ Invente un mot ou une phrase !</h2>
+      <p id="word-sub" style="color:var(--muted);margin-bottom:14px;font-size:0.9rem;"></p>
+      <div id="ref-drawing-wrap">
+        <div id="ref-label">🖼️ Dessin à décrire :</div>
+        <img id="ref-img" src="" alt="dessin" />
+      </div>
+      <input type="text" id="word-input" placeholder="Ex: un chat sur une Ferrari..." maxlength="80" autocomplete="off" />
+      <button class="btn btn-primary" onclick="submitWord()">Valider ✅</button>
+    </div>
+  </div>
+
+  <!-- ── DRAW ──────────────────────────────────────────────────── -->
+  <div id="s-draw" class="section" style="max-width:760px;">
+    <div id="draw-badge" class="round-badge" style="display:block;text-align:center;">Round 2</div>
+    <div id="draw-prompt" class="prompt-display">🤔 ...</div>
+
+    <canvas id="draw-canvas" height="540"></canvas>
+
+    <div class="tools">
+      <div class="color-btn active" data-color="#111111" style="background:#111111" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#ff2d78" style="background:#ff2d78" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#ffd93d" style="background:#ffd93d" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#06d6a0" style="background:#06d6a0" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#00f5d4" style="background:#00f5d4" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#3a86ff" style="background:#3a86ff" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#c77dff" style="background:#c77dff" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#ff9f1c" style="background:#ff9f1c" onclick="setColor(this)"></div>
+      <div class="color-btn" data-color="#ffffff" style="background:#fff;border:2px solid #aaa;" onclick="setColor(this)"></div>
+
+      <button class="size-btn active" data-size="4" onclick="setSize(this)">S</button>
+      <button class="size-btn" data-size="12" onclick="setSize(this)">M</button>
+      <button class="size-btn" data-size="26" onclick="setSize(this)">L</button>
+      <button class="size-btn" data-size="50" onclick="setSize(this)">XL</button>
+
+      <button id="eraser-btn" onclick="toggleEraser()">🧹</button>
+      <button id="undo-btn" onclick="undoDraw()">↩️</button>
+      <button id="clear-btn" onclick="clearCanvas()">🗑 Tout effacer</button>
+
+      <div id="brush-preview-wrap">
+        <div id="brush-preview" style="width:12px;height:12px;"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:16px;max-width:520px;align-self:center;" onclick="submitDrawing()">Valider le dessin ✅</button>
+  </div>
+
+  <!-- ── WAITING ────────────────────────────────────────────────── -->
+  <div id="s-waiting" class="section" style="max-width:520px;">
+    <div class="status-card">
+      <span class="status-icon">🎨</span>
+      <div class="status-title">Bien envoyé !</div>
+      <p style="color:var(--muted);font-size:1rem;">On attend encore <strong id="waiting-count" style="color:var(--yellow);">?</strong> joueur(s)
+        <span class="waiting-dots"><span>.</span><span>.</span><span>.</span></span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ────────────────────────────────────────────────── -->
+  <div id="s-results" class="section" style="max-width:580px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="logo" style="font-size:2.8rem;">🎉 Résultats !</div>
+      <p style="color:var(--muted);">Voyons comment tout a dégénéré...</p>
+    </div>
+    <div id="chains-display"></div>
+    <button class="btn btn-purple" onclick="location.reload()">🔄 Rejouer</button>
+  </div>
+
+  <!-- ── KICKED ─────────────────────────────────────────────────── -->
+  <div id="s-kicked" class="section" style="max-width:520px;">
+    <div class="status-card">
+      <span class="status-icon">👢</span>
+      <div class="status-title">Kické !</div>
+      <p style="color:var(--muted);">L'admin t'a expulsé de la partie.</p>
+      <button class="btn btn-primary" onclick="location.reload()" style="margin-top:20px;">Retour</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  BACKGROUND PARTICLE SYSTEM
+// ══════════════════════════════════════════════════════════════════
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgW, bgH;
+const PARTICLE_COLORS = ['#ff2d78','#ffd93d','#00f5d4','#c77dff','#06d6a0','#3a86ff'];
+
+const stars = [];
+function resizeBg() {
+  bgW = bgCanvas.width = window.innerWidth;
+  bgH = bgCanvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars.length = 0;
+  for (let i = 0; i < 80; i++) {
+    stars.push({
+      x: Math.random() * bgW, y: Math.random() * bgH,
+      r: Math.random() * 1.5 + 0.3,
+      alpha: Math.random() * 0.5 + 0.1,
+      speed: Math.random() * 0.3 + 0.05,
+      drift: (Math.random() - 0.5) * 0.3,
+      color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
+    });
+  }
+}
+
+function animateBg() {
+  bgCtx.clearRect(0, 0, bgW, bgH);
+  for (const s of stars) {
+    s.y -= s.speed;
+    s.x += s.drift;
+    if (s.y < -4) { s.y = bgH + 4; s.x = Math.random() * bgW; }
+    if (s.x < -4) s.x = bgW + 4;
+    if (s.x > bgW + 4) s.x = -4;
+    bgCtx.beginPath();
+    bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = s.color;
+    bgCtx.globalAlpha = s.alpha;
+    bgCtx.fill();
+  }
+  bgCtx.globalAlpha = 1;
+  requestAnimationFrame(animateBg);
+}
+window.addEventListener('resize', () => { resizeBg(); });
+resizeBg(); initStars(); animateBg();
+
+// ══════════════════════════════════════════════════════════════════
+//  SOUND ENGINE (Web Audio API — pas besoin de fichiers !)
+// ══════════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, type = 'sine', dur = 0.12, vol = 0.15, delay = 0) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    const t = ctx.currentTime + delay;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.start(t); osc.stop(t + dur + 0.01);
+  } catch(e) {}
+}
+
+function sfxClick()  { playTone(880, 'sine', 0.08, 0.12); }
+function sfxReady()  { playTone(523, 'sine', 0.1, 0.15); playTone(659, 'sine', 0.1, 0.15, 0.1); playTone(784, 'sine', 0.15, 0.15, 0.2); }
+function sfxSubmit() { playTone(660, 'triangle', 0.08, 0.18); playTone(990, 'triangle', 0.15, 0.18, 0.08); }
+function sfxNewRound(){ playTone(392, 'square', 0.07, 0.1); playTone(494, 'square', 0.07, 0.1, 0.08); playTone(587, 'square', 0.07, 0.1, 0.16); playTone(784, 'square', 0.14, 0.12, 0.24); }
+function sfxResults() {
+  const notes = [523,659,784,1047,784,1047,1319];
+  notes.forEach((f, i) => playTone(f, 'sine', 0.18, 0.15, i * 0.1));
+}
+function sfxTick()   { playTone(440, 'square', 0.03, 0.06); }
+function sfxUrgent() { playTone(880, 'sawtooth', 0.05, 0.12); playTone(880, 'sawtooth', 0.05, 0.12, 0.1); }
+function sfxDraw()   { playTone(200 + Math.random()*300, 'sine', 0.04, 0.03); }
+
+// ══════════════════════════════════════════════════════════════════
+//  BACKGROUND MUSIC (Web Audio synthesis)
+// ══════════════════════════════════════════════════════════════════
+let musicPlaying = false;
+let musicNodes = [];
+const musicBtn = document.getElementById('music-btn');
+
+const MELODY = [261,293,329,349,392,440,494,523,494,440,392,349,329,293];
+let melodyIdx = 0;
+let musicInterval = null;
+
+function startMusic() {
+  try {
+    const ctx = getAudioCtx();
+    // Bass drone
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bass.type = 'sine'; bass.frequency.value = 65.4;
+    bassGain.gain.value = 0.06;
+    bass.start();
+    musicNodes.push(bass, bassGain);
+
+    // Pad
+    const pad = ctx.createOscillator();
+    const padGain = ctx.createGain();
+    pad.connect(padGain); padGain.connect(ctx.destination);
+    pad.type = 'triangle'; pad.frequency.value = 130.8;
+    padGain.gain.value = 0.04;
+    pad.start();
+    musicNodes.push(pad, padGain);
+
+    // Melody arpeggio
+    melodyIdx = 0;
+    musicInterval = setInterval(() => {
+      if (!musicPlaying) return;
+      playTone(MELODY[melodyIdx % MELODY.length], 'triangle', 0.25, 0.07);
+      melodyIdx++;
+    }, 350);
+
+    musicPlaying = true;
+    musicBtn.textContent = '🔊';
+    musicBtn.classList.add('playing');
+  } catch(e) {}
+}
+
+function stopMusic() {
+  clearInterval(musicInterval);
+  for (const n of musicNodes) { try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e) {} }
+  musicNodes = [];
+  musicPlaying = false;
+  musicBtn.textContent = '🎵';
+  musicBtn.classList.remove('playing');
+}
+
+function toggleMusic() {
+  sfxClick();
+  if (musicPlaying) stopMusic(); else startMusic();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PARTICLE BURST
+// ══════════════════════════════════════════════════════════════════
+function burst(x, y, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 10 + 5;
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = Math.random() * 80 + 40;
+    const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist;
+    p.style.cssText = `
+      left:${x - size/2}px; top:${y - size/2}px;
+      width:${size}px; height:${size}px;
+      background:${PARTICLE_COLORS[Math.floor(Math.random()*PARTICLE_COLORS.length)]};
+      --end-pos: translate(${dx}px, ${dy}px);
+      animation-duration: ${Math.random()*0.4+0.5}s;
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+
+// Burst on button clicks
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn');
+  if (btn && !btn.disabled) {
+    sfxClick();
+    burst(e.clientX, e.clientY, 10);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  CANVAS
+// ══════════════════════════════════════════════════════════════════
+const canvas = document.getElementById('draw-canvas');
+const ctx2 = canvas.getContext('2d');
+let drawing = false, eraser = false;
+let currentColor = '#111111', currentSize = 4;
+let lastX = 0, lastY = 0;
+let history = [], historyIndex = -1;
+
+function saveHistory() {
+  historyIndex++;
+  history = history.slice(0, historyIndex);
+  history.push(canvas.toDataURL());
+  if (history.length > 30) { history.shift(); historyIndex--; }
+}
+
+function undoDraw() {
+  sfxClick();
+  if (historyIndex > 0) {
+    historyIndex--;
+    const img = new Image();
+    img.onload = () => { ctx2.clearRect(0,0,canvas.width,canvas.height); ctx2.drawImage(img,0,0); };
+    img.src = history[historyIndex];
+  } else if (historyIndex === 0) {
+    ctx2.fillStyle = 'white';
+    ctx2.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function initCanvas() {
+  const maxW = Math.min(window.innerWidth - 32, 760);
+  canvas.width = maxW;
+  canvas.height = Math.round(maxW * 0.65);
+  ctx2.fillStyle = 'white';
+  ctx2.fillRect(0, 0, canvas.width, canvas.height);
+  history = []; historyIndex = -1;
+  saveHistory();
+}
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const sx = canvas.width / r.width, sy = canvas.height / r.height;
+  const src = e.touches ? e.touches[0] : e;
+  return [(src.clientX - r.left) * sx, (src.clientY - r.top) * sy];
+}
+
+function startDraw(e) {
+  e.preventDefault(); drawing = true;
+  [lastX, lastY] = getPos(e);
+  ctx2.beginPath();
+  ctx2.arc(lastX, lastY, (eraser ? currentSize * 3 : currentSize) / 2, 0, Math.PI * 2);
+  ctx2.fillStyle = eraser ? 'white' : currentColor;
+  ctx2.fill();
+}
+
+function doDraw(e) {
+  e.preventDefault();
+  if (!drawing) return;
+  const [x, y] = getPos(e);
+  ctx2.beginPath(); ctx2.moveTo(lastX, lastY); ctx2.lineTo(x, y);
+  ctx2.strokeStyle = eraser ? 'white' : currentColor;
+  ctx2.lineWidth = eraser ? currentSize * 3 : currentSize;
+  ctx2.lineCap = 'round'; ctx2.lineJoin = 'round'; ctx2.stroke();
+  [lastX, lastY] = [x, y];
+  // Small draw sfx occasionally
+  if (Math.random() < 0.05) sfxDraw();
+}
+
+function stopDraw(e) {
+  if (drawing) { e.preventDefault(); drawing = false; saveHistory(); }
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', doDraw);
+canvas.addEventListener('mouseup', stopDraw);
+canvas.addEventListener('mouseleave', stopDraw);
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', doDraw, { passive: false });
+canvas.addEventListener('touchend', stopDraw, { passive: false });
+canvas.addEventListener('touchcancel', stopDraw, { passive: false });
+
+function updateBrushPreview() {
+  const prev = document.getElementById('brush-preview');
+  const s = eraser ? currentSize * 3 : currentSize;
+  const d = Math.max(8, Math.min(s, 50));
+  prev.style.width = d + 'px'; prev.style.height = d + 'px';
+  prev.style.background = eraser ? '#ccc' : currentColor;
+}
+
+function setColor(el) {
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); currentColor = el.dataset.color;
+  eraser = false; document.getElementById('eraser-btn').classList.remove('active');
+  updateBrushPreview(); sfxClick();
+  burst(el.getBoundingClientRect().left + 18, el.getBoundingClientRect().top + 18, 6);
+}
+function setSize(el) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); currentSize = parseInt(el.dataset.size);
+  updateBrushPreview(); sfxClick();
+}
+function toggleEraser() {
+  eraser = !eraser;
+  document.getElementById('eraser-btn').classList.toggle('active', eraser);
+  if (eraser) document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  updateBrushPreview(); sfxClick();
+}
+function clearCanvas() {
+  sfxClick();
+  ctx2.fillStyle = 'white'; ctx2.fillRect(0, 0, canvas.width, canvas.height);
+  saveHistory();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SCREEN SYSTEM
+// ══════════════════════════════════════════════════════════════════
+const ALL = ['s-join','s-lobby','s-word','s-draw','s-waiting','s-results','s-kicked'];
+const TIMER_SCREENS = new Set(['s-word','s-draw','s-waiting']);
+
+function show(id) {
+  ALL.forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+    el.classList.remove('fade-in');
+  });
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  requestAnimationFrame(() => el.classList.add('fade-in'));
+  if (!TIMER_SCREENS.has(id)) {
+    document.getElementById('timer-wrap').style.display = 'none';
+  }
+}
+function showTimer() { document.getElementById('timer-wrap').style.display = 'block'; }
+
+// ══════════════════════════════════════════════════════════════════
+//  WEBSOCKET
+// ══════════════════════════════════════════════════════════════════
+let ws, myId, myName;
+let timerMax = 80, lastTimerVal = 80;
+
+function connect() {
+ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
+  ws.onmessage = e => handle(JSON.parse(e.data));
+  ws.onclose = () => {
+    if (document.getElementById('s-kicked').style.display !== 'block') setTimeout(connect, 2000);
+  };
+}
+
+function joinGame() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  myName = name; connect();
+  ws.onopen = () => ws.send(JSON.stringify({ type: 'join', name }));
+}
+document.getElementById('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
+
+function setReady() {
+  sfxReady();
+  ws.send(JSON.stringify({ type: 'ready' }));
+  const btn = document.getElementById('ready-btn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ En attente des autres...';
+  btn.style.background = 'rgba(6,214,160,0.25)';
+}
+
+function submitWord() {
+  const val = document.getElementById('word-input').value.trim();
+  if (!val) {
+    document.getElementById('word-input').style.borderColor = 'var(--pink)';
+    setTimeout(() => document.getElementById('word-input').style.borderColor = '', 1000);
+    sfxClick();
+    return;
+  }
+  sfxSubmit();
+  ws.send(JSON.stringify({ type: 'submit', content: val }));
+  show('s-waiting');
+  document.getElementById('waiting-count').textContent = '?';
+}
+document.getElementById('word-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitWord(); });
+
+function submitDrawing() {
+  sfxSubmit();
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+  ws.send(JSON.stringify({ type: 'submit', content: dataUrl }));
+  show('s-waiting');
+  document.getElementById('waiting-count').textContent = '?';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  HANDLE MESSAGES
+// ══════════════════════════════════════════════════════════════════
+function handle(msg) {
+  switch (msg.type) {
+
+    case 'welcome':
+      myId = msg.id;
+      sfxReady();
+      show('s-lobby');
+      break;
+
+    case 'lobby':
+      updateLobby(msg.players);
+      if (!['s-waiting','s-word','s-draw','s-results'].some(
+          id => document.getElementById(id).style.display === 'block')) {
+        show('s-lobby');
+      }
+      break;
+
+    case 'your_turn':
+      timerMax = msg.timerDuration || 80;
+      lastTimerVal = timerMax;
+      showTimer();
+      sfxNewRound();
+      if (msg.taskType === 'word') {
+        document.getElementById('word-badge').textContent = `Round ${msg.round}`;
+        if (!msg.prompt) {
+          document.getElementById('word-title').textContent = '✏️ Invente un mot ou une phrase !';
+          document.getElementById('word-sub').textContent = 'Sois créatif, ça va dégénérer 😈';
+          document.getElementById('ref-drawing-wrap').style.display = 'none';
+        } else {
+          document.getElementById('word-title').textContent = '✏️ Décris ce dessin !';
+          document.getElementById('word-sub').textContent = `Dessin de : ${msg.chainOwner}`;
+          if (msg.promptType === 'drawing') {
+            document.getElementById('ref-img').src = msg.prompt;
+            document.getElementById('ref-drawing-wrap').style.display = 'block';
+          } else {
+            document.getElementById('ref-drawing-wrap').style.display = 'none';
+          }
+        }
+        document.getElementById('word-input').value = '';
+        show('s-word');
+        setTimeout(() => document.getElementById('word-input').focus(), 150);
+      } else {
+        document.getElementById('draw-badge').textContent = `Round ${msg.round}`;
+        document.getElementById('draw-prompt').textContent = `🖊️ Dessine : "${msg.prompt}"`;
+        show('s-draw');
+        setTimeout(() => { initCanvas(); updateBrushPreview(); }, 60);
+      }
+      break;
+
+    case 'timer':
+      updateTimer(msg.timeLeft);
+      break;
+
+    case 'submitted':
+      document.getElementById('waiting-count').textContent = msg.waiting;
+      show('s-waiting');
+      break;
+
+    case 'waiting_update':
+      showToast('✅ ' + msg.name + ' a terminé — encore ' + msg.waiting + ' joueur(s)');
+      break;
+
+    case 'round_start':
+      show('s-waiting');
+      break;
+
+    case 'results':
+      sfxResults();
+      renderResults(msg.results);
+      break;
+
+    case 'chat':
+      showChat(msg.from, msg.text);
+      break;
+
+    case 'kicked':
+      show('s-kicked'); ws.close();
+      break;
+
+    case 'troll':
+      handleTroll(msg);
+      break;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════════════════════════
+const COLORS = ['#ff2d78','#ffd93d','#00f5d4','#06d6a0','#c77dff','#3a86ff','#ff9f1c','#1abc9c'];
+
+function updateLobby(players) {
+  document.getElementById('players-list').innerHTML = players.map((p, i) => {
+    const col = COLORS[i % COLORS.length];
+    return `<div class="player-chip ${p.ready ? 'ready' : ''}">
+      <div class="avatar" style="background:${col}22;color:${col}">${p.name.slice(0,2).toUpperCase()}</div>
+      <span>${p.name}</span>
+      ${p.ready ? '<span style="color:var(--green);font-size:1.1rem;">✓</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function updateTimer(t) {
+  const numEl = document.getElementById('timer-num');
+  numEl.textContent = t;
+  numEl.classList.remove('tick');
+  void numEl.offsetWidth;
+  numEl.classList.add('tick');
+
+  const pct = Math.max(0, (t / timerMax) * 100);
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = t > 20 ? 'var(--cyan)' : t > 10 ? 'var(--yellow)' : 'var(--pink)';
+
+  // Sound ticks
+  if (t <= 10 && t > 0) sfxUrgent();
+  else if (t > 0 && t % 10 === 0) sfxTick();
+}
+
+function renderResults(results) {
+  const c = document.getElementById('chains-display');
+  c.innerHTML = '';
+  results.forEach(({ owner, chain }) => {
+    const card = document.createElement('div');
+    card.className = 'chain-card';
+    card.innerHTML = `<div class="chain-title">🔗 Chaîne de ${owner}</div>`;
+    chain.forEach(step => {
+      const div = document.createElement('div');
+      div.className = 'chain-step';
+      div.innerHTML = `<div class="step-author">↳ ${step.author}</div>`;
+      if (step.type === 'word') {
+        div.innerHTML += `<div class="step-word">💬 "${step.content}"</div>`;
+      } else if (step.content) {
+        div.innerHTML += `<div class="step-drawing"><img src="${step.content}" alt="dessin"></div>`;
+      } else {
+        div.innerHTML += `<div class="step-word" style="opacity:0.4">🤷 (pas de dessin)</div>`;
+      }
+      card.appendChild(div);
+    });
+    c.appendChild(card);
+  });
+  show('s-results');
+}
+
+function showChat(from, text) {
+  const log = document.getElementById('chat-log');
+  const el = document.createElement('div');
+  el.className = 'chat-msg';
+  el.innerHTML = `<span class="from">${from}</span> ${text}`;
+  log.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+function showToast(text) {
+  const el = document.createElement('div');
+  el.className = 'toast-notif';
+  el.innerHTML = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TROLL ENGINE 😈
+// ══════════════════════════════════════════════════════════════════
+function handleTroll(msg) {
+  const overlay  = document.getElementById('troll-overlay');
+  const wrap     = document.getElementById('troll-media-wrap');
+  const textBan  = document.getElementById('troll-text-banner');
+  const closeBtn = document.getElementById('troll-close-btn');
+
+  switch (msg.mediaType) {
+    case 'image': {
+      clearTroll();
+      const img = document.createElement('img');
+      img.src = msg.url; img.alt = 'troll';
+      wrap.appendChild(img);
+      overlay.classList.add('active', 'has-media');
+      closeBtn.style.display = 'block';
+      sfxUrgent();
+      break;
+    }
+    case 'video': {
+      clearTroll();
+      const vid = document.createElement('video');
+      vid.src = msg.url; vid.autoplay = true; vid.controls = true;
+      vid.style.cssText = 'max-width:100%;max-height:70vh;border-radius:18px;';
+      wrap.appendChild(vid);
+      overlay.classList.add('active', 'has-media');
+      closeBtn.style.display = 'block';
+      break;
+    }
+    case 'sound': {
+      const audio = new Audio(msg.url);
+      audio.play().catch(() => {});
+      showToast('🔊 TROLL SONORE !');
+      break;
+    }
+    case 'text': {
+      clearTroll();
+      textBan.textContent = msg.text;
+      textBan.style.display = 'block';
+      overlay.classList.add('active', 'has-media');
+      closeBtn.style.display = 'block';
+      sfxUrgent();
+      break;
+    }
+    case 'shake': {
+      document.body.classList.remove('troll-shaking');
+      void document.body.offsetWidth;
+      document.body.classList.add('troll-shaking');
+      document.body.addEventListener('animationend', () => document.body.classList.remove('troll-shaking'), { once: true });
+      sfxUrgent();
+      break;
+    }
+    case 'blind': {
+      const blind = document.getElementById('troll-blind');
+      blind.style.display = 'block';
+      sfxUrgent();
+      setTimeout(() => { blind.style.display = 'none'; }, 3000);
+      break;
+    }
+    case 'zoom': {
+      document.body.classList.remove('troll-zooming');
+      void document.body.offsetWidth;
+      document.body.classList.add('troll-zooming');
+      document.body.addEventListener('animationend', () => document.body.classList.remove('troll-zooming'), { once: true });
+      sfxUrgent();
+      break;
+    }
+    case 'flip': {
+      document.body.style.transition = 'transform 0.5s ease';
+      document.body.style.transform = 'rotate(180deg)';
+      sfxUrgent();
+      setTimeout(() => { document.body.style.transform = ''; document.body.style.transition = ''; }, 5000);
+      break;
+    }
+    case 'clear': {
+      clearTroll();
+      break;
+    }
+  }
+}
+
+function clearTroll() {
+  const overlay  = document.getElementById('troll-overlay');
+  const wrap     = document.getElementById('troll-media-wrap');
+  const textBan  = document.getElementById('troll-text-banner');
+  const closeBtn = document.getElementById('troll-close-btn');
+  overlay.classList.remove('active', 'has-media');
+  closeBtn.style.display = 'none';
+  textBan.style.display = 'none';
+  textBan.textContent = '';
+  Array.from(wrap.children).forEach(c => { if (c !== textBan) c.remove(); });
+  document.body.style.transform = '';
+  document.body.style.transition = '';
+}
+</script>
+</body>
+</html>
